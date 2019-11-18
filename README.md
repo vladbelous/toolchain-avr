@@ -1,2 +1,2 @@
-# toolchain-avr
-Toolchain for AVR 8-bit microcontrollers using Docker
+# Toolchain for AVR 8-bit microcontrollers
+TODO: add description
