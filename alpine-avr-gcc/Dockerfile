@@ -18,8 +18,8 @@ ENV PKG_GCC_VER 10.1.0
 ENV PKG_GCC gcc-${PKG_GCC_VER}
 
 # Expecting arduino-nightly-{YYYYMMDD}.tar.xz
-ENV PKG_ARDUINO arduino-nightly
 ENV PKG_ARDUINO_DATE 20200624
+ENV PKG_ARDUINO arduino-nightly-${PKG_ARDUINO_DATE}
 
 # http://download.savannah.gnu.org/releases/avrdude/
 ENV PKG_AVRDUDE_VER 6.3
@@ -46,7 +46,7 @@ RUN addgroup avr \
 USER avr
 
 # Build and install binutils
-COPY ${PKG_BINUTILS}.tar.xz /var/build/${PKG_BINUTILS}.tar.xz 
+COPY ${PKG_BINUTILS}.tar.xz /var/build/
 RUN tar -xf ${PKG_BINUTILS}.tar.xz \
   && cd ${PKG_BINUTILS} \
     && mkdir build-out \
@@ -58,7 +58,7 @@ RUN tar -xf ${PKG_BINUTILS}.tar.xz \
   && rm -rf ${PKG_BINUTILS}
 
 # Build and install GCC
-COPY ${PKG_GCC}.tar.xz /var/build/${PKG_GCC}.tar.xz 
+COPY ${PKG_GCC}.tar.xz /var/build/
 RUN tar -xf ${PKG_GCC}.tar.xz \
   && cd ${PKG_GCC} \
     && sed -i 's/sha512sum --check/sha512sum -c/' \
@@ -78,7 +78,7 @@ RUN tar -xf ${PKG_GCC}.tar.xz \
   && rm -rf ${PKG_GCC}
 
 # Take avr-libc files from arduino-nightly package
-COPY ${PKG_ARDUINO}-${PKG_ARDUINO_DATE}.tar.xz /var/build/${PKG_ARDUINO}.tar.xz
+COPY ${PKG_ARDUINO}.tar.xz /var/build/
 RUN tar -xf ${PKG_ARDUINO}.tar.xz \
   && cd ${PKG_ARDUINO}/hardware/tools/avr \
     && cp -rv avr/include ${PREFIX}/avr/ \
