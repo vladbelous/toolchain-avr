@@ -1,18 +1,29 @@
-FROM alpine:3.10 AS build-env
+FROM alpine:3.12 AS build-env
 
-RUN apk --update add wget build-base
+# TODO remove 'bison', 'sudo'
+RUN apk --update add sudo wget build-base perl texinfo bison
 
 ENV PREFIX /opt/avr-toolchain
 ENV PATH "${PREFIX}/bin:${PATH}"
 
-# https://ftp.gnu.org/gnu/binutils/binutils-2.33.1.tar.xz
-ENV PKG_BINUTILS binutils-2.33.1
-# https://ftp.gnu.org/gnu/gcc/gcc-9.2.0/gcc-9.2.0.tar.xz
-ENV PKG_GCC gcc-9.2.0
+ENV PREFIX_AVRDUDE /opt/avrdude
+ENV PATH "${PREFIX_AVRDUDE}/bin:${PATH}"
+
+# https://ftp.gnu.org/gnu/binutils/binutils-XXX.tar.xz
+ENV PKG_BINUTILS_VER 2.34
+ENV PKG_BINUTILS binutils-${PKG_BINUTILS_VER}
+
+# https://ftp.gnu.org/gnu/gcc-XXX/gcc-XXX.tar.xz
+ENV PKG_GCC_VER 10.1.0
+ENV PKG_GCC gcc-${PKG_GCC_VER}
 
 # Expecting arduino-nightly-{YYYYMMDD}.tar.xz
 ENV PKG_ARDUINO arduino-nightly
-ENV PKG_ARDUINO_DATE 20191113
+ENV PKG_ARDUINO_DATE 20200624
+
+# http://download.savannah.gnu.org/releases/avrdude/
+ENV PKG_AVRDUDE_VER 6.3
+ENV PKG_AVRDUDE avrdude-${PKG_AVRDUDE_VER}
 
 # Test settings for target binaries
 ENV CFLAGS "-Os"
@@ -29,7 +40,9 @@ RUN addgroup avr \
   && adduser -D -G avr avr \
   && chown avr:avr . \
   && mkdir -p ${PREFIX} \
-  && chown -R avr:avr ${PREFIX}
+  && chown -R avr:avr ${PREFIX} \
+  && mkdir -p ${PREFIX_AVRDUDE} \
+  && chown -R avr:avr ${PREFIX_AVRDUDE}
 USER avr
 
 # Build and install binutils
@@ -68,36 +81,44 @@ RUN tar -xf ${PKG_GCC}.tar.xz \
 COPY ${PKG_ARDUINO}-${PKG_ARDUINO_DATE}.tar.xz /var/build/${PKG_ARDUINO}.tar.xz
 RUN tar -xf ${PKG_ARDUINO}.tar.xz \
   && cd ${PKG_ARDUINO}/hardware/tools/avr \
-    && cp -r avr/include ${PREFIX}/avr/ \
-    && cp -r avr/lib/avr* ${PREFIX}/avr/lib/ \
-    && cp avr/lib/crt*.o ${PREFIX}/avr/lib/ \
-    && cp avr/lib/lib*.a ${PREFIX}/avr/lib/ \
-    && cp -r avr/lib/tiny-stack ${PREFIX}/avr/lib/ \
+    && cp -rv avr/include ${PREFIX}/avr/ \
+    && cp -rv avr/lib/avr* ${PREFIX}/avr/lib/ \
+    && cp -v  avr/lib/crt*.o ${PREFIX}/avr/lib/ \
+    && cp -v  avr/lib/lib*.a ${PREFIX}/avr/lib/ \
+    && cp -rv avr/lib/tiny-stack ${PREFIX}/avr/lib/ \
   && cd /var/build \
   && rm -rf ${PKG_ARDUINO}
 
-# Optionally, copy a few device-specs files missing from 9.2.0:
-RUN tar -xf ${PKG_ARDUINO}.tar.xz \
-  && cd ${PKG_ARDUINO}/hardware/tools/avr \
-  && cd lib/gcc/avr/7.3.0/device-specs \
-  && ( for fn in 1608 1609 3208 3209 324pb 4808 4809 808 809; do \
-        cp specs-atmega${fn} ${PREFIX}/lib/gcc/avr/9.2.0/device-specs/ ; \
-       done \
-     ) \
-  && ( for fn in 102 104 1604 1606 1607 202 204 402 404 406 804 806 807; do \
-        cp specs-attiny${fn} ${PREFIX}/lib/gcc/avr/9.2.0/device-specs/ ; \
-       done \
-     ) \
-  && cd /var/build \
-  && rm -rf ${PKG_ARDUINO}
+# Build and install avrdude
+# - install extra packages for avrdude
+USER root
+RUN apk --update add bison flex libusb-dev
+USER avr
+# - build and install
+COPY ${PKG_AVRDUDE}.tar.gz /var/build/
+RUN tar -xf ${PKG_AVRDUDE}.tar.gz \
+  && cd ${PKG_AVRDUDE} \
+    && mkdir build-out \
+    && cd build-out \
+      && ../configure --prefix=${PREFIX_AVRDUDE} \
+                      --disable-parport \
+      && make -j$(nproc) \
+      && make install \
+      && cd ../.. \
+  && rm -rf ${PKG_AVRDUDE}
 
 
 # Final environment:
-FROM alpine:3.10
+FROM alpine:3.12
 
 ENV PREFIX /opt/avr-toolchain
 ENV PATH "${PREFIX}/bin:${PATH}"
+
+ENV PREFIX_AVRDUDE /opt/avrdude
+ENV PATH "${PREFIX_AVRDUDE}/bin:${PATH}"
+
 COPY --from=build-env $PREFIX $PREFIX
+COPY --from=build-env $PREFIX_AVRDUDE $PREFIX_AVRDUDE
 
 WORKDIR /var/avr
 RUN addgroup avr \
