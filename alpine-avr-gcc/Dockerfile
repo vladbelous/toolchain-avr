@@ -77,6 +77,13 @@ RUN tar -xf ${PKG_GCC}.tar.xz \
       && cd ../.. \
   && rm -rf ${PKG_GCC}
 
+# Patch ldscripts/avrxmega3.xn due to a DATA_REGION_ORIGIN issue.
+# See: https://www.avrfreaks.net/forum/solved-compiling-attiny1607-or-other-0-series1-series-avr-gcc 
+COPY ldscript-avrxmega3.xn.patch /var/build/
+RUN cd ${PREFIX}/avr/lib/ldscripts/ \
+  && cp -v /var/build/ldscript-avrxmega3.xn.patch . \
+  && patch -p0 --backup avrxmega3.xn < ldscript-avrxmega3.xn.patch
+
 # Take avr-libc files from arduino-nightly package
 COPY ${PKG_ARDUINO}.tar.xz /var/build/
 RUN tar -xf ${PKG_ARDUINO}.tar.xz \

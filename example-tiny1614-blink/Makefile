@@ -14,18 +14,11 @@ AVRDUDE=$(DOCKER_RUN) avrdude
 MCU=attiny1614
 
 # Compile options
-CPPFLAGS=-c -Os -mmcu=$(MCU)
+CPPFLAGS=-c -Os -mmcu=$(MCU) -flto
 
 # Link flags
-# TODO: some issue with linker script related to
-# the __REGION_DATA_ORIGIN__ symbol.
-# See: https://www.avrfreaks.net/forum/solved-compiling-attiny1607-or-other-0-series1-series-avr-gcc 
-LINKFLAGS=-mmcu=$(MCU) -T my-avrxmega3.x
+LINKFLAGS=-mmcu=$(MCU) -flto
 # Consider: -flto -ffunction-sections
-
-blink.elf: main.cpp
-	$(CPP) $(CPPFLAGS) main.cpp
-	$(CPP) $(LINKFLAGS) -o $@ main.o
 
 blink.hex: blink.elf
 	$(OBJCOPY) -j .text -j .data -j .rodata \
@@ -33,6 +26,10 @@ blink.hex: blink.elf
 
 blink.S: blink.elf
 	$(OBJDUMP) -S $< > $@
+
+blink.elf: main.cpp
+	$(CPP) $(CPPFLAGS) main.cpp
+	$(CPP) $(LINKFLAGS) -o $@ main.o
 
 
 # TODO: add flashing with avrdude.

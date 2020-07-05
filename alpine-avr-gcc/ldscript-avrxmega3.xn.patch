@@ -1,0 +1,11 @@
+--- avrxmega3.xn	2020-07-05 14:22:07.095079054 -0700
++++ avrxmega3.xn	2020-07-05 14:24:50.013092153 -0700
+@@ -16,7 +16,7 @@
+ MEMORY
+ {
+   text   (rx)   : ORIGIN = 0, LENGTH = __TEXT_REGION_LENGTH__
+-  data   (rw!x) : ORIGIN = 0x802000, LENGTH = __DATA_REGION_LENGTH__
++  data   (rw!x) : ORIGIN = __DATA_REGION_ORIGIN__, LENGTH = __DATA_REGION_LENGTH__
+   eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = __EEPROM_REGION_LENGTH__
+   fuse      (rw!x) : ORIGIN = 0x820000, LENGTH = __FUSE_REGION_LENGTH__
+   lock      (rw!x) : ORIGIN = 0x830000, LENGTH = __LOCK_REGION_LENGTH__
