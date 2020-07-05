@@ -80,14 +80,14 @@ RUN tar -xf ${PKG_GCC}.tar.xz \
 # Take avr-libc files from arduino-nightly package
 COPY ${PKG_ARDUINO}.tar.xz /var/build/
 RUN tar -xf ${PKG_ARDUINO}.tar.xz \
-  && cd ${PKG_ARDUINO}/hardware/tools/avr \
+  && cd arduino-nightly/hardware/tools/avr \
     && cp -rv avr/include ${PREFIX}/avr/ \
     && cp -rv avr/lib/avr* ${PREFIX}/avr/lib/ \
     && cp -v  avr/lib/crt*.o ${PREFIX}/avr/lib/ \
     && cp -v  avr/lib/lib*.a ${PREFIX}/avr/lib/ \
     && cp -rv avr/lib/tiny-stack ${PREFIX}/avr/lib/ \
   && cd /var/build \
-  && rm -rf ${PKG_ARDUINO}
+  && rm -rf arduino-nightly
 
 # Build and install avrdude
 # - install extra packages for avrdude
