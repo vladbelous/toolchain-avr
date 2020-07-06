@@ -14,11 +14,11 @@ int main() {
   while (true) {
     //PORTB.OUTSET = PIN3_bm;
     VPORTB.OUT |= PIN3_bm;
-    _delay_ms(500);
+    _delay_ms(1000);
 
     //PORTB.OUTCLR = PIN3_bm;
     VPORTB.OUT &= ~PIN3_bm;
-    _delay_ms(500);
+    _delay_ms(1000);
   }
   return 0;
 }

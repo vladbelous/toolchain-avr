@@ -118,6 +118,8 @@ RUN tar -xf ${PKG_AVRDUDE}.tar.gz \
 # Final environment:
 FROM alpine:3.12
 
+RUN apk --update add libusb
+
 ENV PREFIX /opt/avr-toolchain
 ENV PATH "${PREFIX}/bin:${PATH}"
 
@@ -130,5 +132,6 @@ COPY --from=build-env $PREFIX_AVRDUDE $PREFIX_AVRDUDE
 WORKDIR /var/avr
 RUN addgroup avr \
   && adduser -D -G avr avr \
+  && addgroup avr dialout \
   && chown avr:avr .
 USER avr
