@@ -1,7 +1,6 @@
 FROM alpine:3.12 AS build-env
 
-# TODO remove 'bison', 'sudo'
-RUN apk --update add sudo wget build-base perl texinfo bison
+RUN apk --update add wget build-base perl texinfo
 
 ENV PREFIX /opt/avr-toolchain
 ENV PATH "${PREFIX}/bin:${PATH}"
