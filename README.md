@@ -33,8 +33,9 @@ If GCC or Arduino versions differ, probably worth verifying if `ldscript-avrxmeg
 Build toolchain docker image:
 ```
 cd alpine-avr-gcc
-docker build -t alpine-avr-gcc .
+docker build -t alpine-avr-gcc --build-arg USERID=$(id -u) --build-arg GROUPID=$(id -g) .
 ```
+Note: this is using your _current_ USERID/GROUPID for the container-internal user:group `avr:avr`. This helps avoid permission issues, particularly since we are mounting a directory from host into container (and creating build artifacts there). The downside is that every user (with a different uid/gid value) will have to build an image specific to themselves.
 
 ## Usage example
 See [example-tiny1614-blink](https://github.com/vladbelous/toolchain-avr/tree/master/example-tiny1614-blink) for a basic complete blink project.

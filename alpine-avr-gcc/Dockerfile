@@ -98,7 +98,7 @@ RUN tar -xf ${PKG_ARDUINO}.tar.xz \
 # Build and install avrdude
 # - install extra packages for avrdude
 USER root
-RUN apk --update add bison flex libusb-dev libftdi1-dev
+RUN apk --update add bison flex libusb-dev libusb-compat-dev libftdi1-dev
 USER avr
 # - build and install
 COPY ${PKG_AVRDUDE}.tar.gz /var/build/
@@ -117,7 +117,7 @@ RUN tar -xf ${PKG_AVRDUDE}.tar.gz \
 # Final environment:
 FROM alpine:3.12
 
-RUN apk --update add libusb libftdi1
+RUN apk --update add libusb libusb-compat libftdi1
 
 ENV PREFIX /opt/avr-toolchain
 ENV PATH "${PREFIX}/bin:${PATH}"
@@ -128,9 +128,21 @@ ENV PATH "${PREFIX_AVRDUDE}/bin:${PATH}"
 COPY --from=build-env $PREFIX $PREFIX
 COPY --from=build-env $PREFIX_AVRDUDE $PREFIX_AVRDUDE
 
-WORKDIR /var/avr
-RUN addgroup avr \
-  && adduser -D -G avr avr \
+# Since we're mounting a host directory and will be creating new
+# files/directories there from the container, it is much more
+# convenient if container user `avr` matches (in terms of uid/gid)
+# your host user.
+# Default is 1000:1000, but you can change this using these args:
+# (via --build-arg, typically to match your `id -u` and `id -g`)
+ARG USERID=1000
+ARG GROUPID=1000
+
+RUN addgroup -g ${GROUPID} avr \
+  && adduser -u ${USERID} -D -G avr avr \
   && addgroup avr dialout \
-  && chown avr:avr .
+  && chown -R avr:avr ${PREFIX} \
+  && chown -R avr:avr ${PREFIX_AVRDUDE}
+
+WORKDIR /var/avr
+RUN chown avr:avr .
 USER avr
