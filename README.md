@@ -2,9 +2,9 @@
 A docker packaged AVR toolchain, consisting of a modern version of `avr-gcc`,
 `avr-libc` (from Arduino nightly builds), and `avrdude` flashing tool with "jtag2updi" config.
 
-### Update 2020-07-06:
+### Update 2020-07-23:
 Blink example confirmed working with the following setup/versions:
-- GCC 10.1.0 (with avrxmega3.xn patch, and binutils 2.34)
+- GCC 10.2.0 (with avrxmega3.xn patch, and binutils 2.34)
 - Arduino nightly from 2020-06-24 (only avr-libc is used)
 - avrdude 6.3
 - tinyAVR 1-series attiny1614
@@ -21,7 +21,7 @@ Unless otherwise stated, all files are licensed under the terms described in the
 
 ## Initial setup
 Download and place into `alpine-avr-gcc` directory:
-- GCC (e.g. https://ftp.gnu.org/gnu/gcc/gcc-10.1.0/gcc-10.1.0.tar.xz)
+- GCC (e.g. https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz)
 - binutils (e.g. https://ftp.gnu.org/gnu/binutils/binutils-2.34.tar.xz)
 - Arduino nightly/hourly build (e.g. https://www.arduino.cc/download.php?f=/arduino-nightly-linux64.tar.xz - name file as `arduino-nightly-YYYYMMDD.tar.xz`). We really only need `avr-libc` from it.
 - avrdude (e.g. http://download.savannah.gnu.org/releases/avrdude/avrdude-6.3.tar.gz)

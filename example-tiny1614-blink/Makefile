@@ -61,6 +61,10 @@ flash: build/blink.hex
         -P $(AVRDUDE_PORT) -p $(AVRDUDE_MCU) \
         -U flash:w:$<:i
 
+# Print out GCC version
+.PHONY: gcc-version
+gcc-version:
+	$(CPP) --version
 
 .PHONY: clean
 clean:

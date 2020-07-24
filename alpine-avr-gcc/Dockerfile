@@ -12,8 +12,8 @@ ENV PATH "${PREFIX_AVRDUDE}/bin:${PATH}"
 ENV PKG_BINUTILS_VER 2.34
 ENV PKG_BINUTILS binutils-${PKG_BINUTILS_VER}
 
-# https://ftp.gnu.org/gnu/gcc-XXX/gcc-XXX.tar.xz
-ENV PKG_GCC_VER 10.1.0
+# https://ftp.gnu.org/gnu/gcc/gcc-XXX/gcc-XXX.tar.xz
+ENV PKG_GCC_VER 10.2.0
 ENV PKG_GCC gcc-${PKG_GCC_VER}
 
 # Expecting arduino-nightly-{YYYYMMDD}.tar.xz
@@ -98,7 +98,7 @@ RUN tar -xf ${PKG_ARDUINO}.tar.xz \
 # Build and install avrdude
 # - install extra packages for avrdude
 USER root
-RUN apk --update add bison flex libusb-dev
+RUN apk --update add bison flex libusb-dev libftdi1-dev
 USER avr
 # - build and install
 COPY ${PKG_AVRDUDE}.tar.gz /var/build/
@@ -117,7 +117,7 @@ RUN tar -xf ${PKG_AVRDUDE}.tar.gz \
 # Final environment:
 FROM alpine:3.12
 
-RUN apk --update add libusb
+RUN apk --update add libusb libftdi1
 
 ENV PREFIX /opt/avr-toolchain
 ENV PATH "${PREFIX}/bin:${PATH}"
